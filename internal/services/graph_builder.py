@@ -1,17 +1,3 @@
-"""Build the artist collaboration graph from ``tracks.csv``.
-
-Vertices are artists; edges connect any two artists that share a track.
-Vertex attributes: name, total_tracks, degree, main_genre.
-Edge attributes: weight (number of shared tracks).
-
-``main_genre`` is empty after ``build()`` — call ``enrich_with_genres()`` to
-fill it via the MusicBrainz API (1 call per unique artist, so ~30 min for a
-~2000-node graph at the 1 req/s throttle).
-
-Run from the project root: ``python -m services.graph_builder``
-                     or:  ``python services/graph_builder.py``
-"""
-
 from __future__ import annotations
 
 import csv
@@ -77,12 +63,7 @@ class CollaborationGraphBuilder:
         client: MusicBrainzClient,
         cache_path: Path | None = None,
     ) -> None:
-        """Fill ``main_genre`` for every node via the MusicBrainz API.
-
-        ``cache_path`` (CSV) is loaded once and consulted before each fetch —
-        cache hits skip the API entirely. Each fresh fetch is appended to the
-        CSV immediately so a partial pass is recoverable on the next run.
-        """
+        
         cache = _load_genre_cache(cache_path) if cache_path else {}
         nodes = list(G.nodes(data=True))
         total = len(nodes)

@@ -27,7 +27,7 @@ from internal.third_party_clients.musicbrainz_client import MusicBrainzClient
 
 
 # Visualization knobs — tweak as needed.
-TOP_N_NODES: int | None = 100     # keep only top-N by degree (None = ignore)
+TOP_N_NODES: int | None = 50     # keep only top-N by degree (None = ignore)
 MIN_DEGREE = 3                   # used only when TOP_N_NODES is None
 ENRICH_GENRES = True             # fetch main_genre via MB API for filtered nodes
 SIZE_BY = "degree"               # "degree" or "total_tracks"
@@ -74,7 +74,6 @@ def render(graphml_path: Path, output_html: Path) -> None:
         notebook=False,
         cdn_resources="in_line",
     )
-    # Stop the simulation after a fixed budget so the page doesn't melt the CPU.
     net.set_options(
         f"""
         {{
@@ -120,9 +119,6 @@ def render(graphml_path: Path, output_html: Path) -> None:
         net.add_edge(u, v, value=edge_attrs.get("weight", 1), color=EDGE_COLOR)
 
     output_html.parent.mkdir(parents=True, exist_ok=True)
-    # PyVis's write_html opens the file with the platform default encoding —
-    # on Windows that's cp1252, which can't encode names like "Beyoncé". Bypass
-    # it: render to a string and write UTF-8 ourselves.
     html = net.generate_html(notebook=False)
     output_html.write_text(html, encoding="utf-8")
     print(f"Wrote {output_html}")
